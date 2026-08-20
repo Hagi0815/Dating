@@ -9,10 +9,13 @@ export async function GET(request) {
   }
   const rows = db.prepare('SELECT * FROM submissions ORDER BY id DESC').all();
   const submissions = rows.map(r => ({
+    id: r.id,
     name: r.user_name,
     date: r.date,
     time: r.time,
     place: r.place,
+    confirmed: !!r.confirmed,
+    answers: JSON.parse(r.answers || '[]'),
     submittedAt: r.submitted_at
   }));
   return NextResponse.json({ submissions });

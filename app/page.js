@@ -183,14 +183,26 @@ export default function Page() {
     setConfirmText(text);
   }
 
+  function editSubmission() {
+    if (lastSubmission) {
+      setDDate(lastSubmission.date || '');
+      setDTime(lastSubmission.time || '');
+      setDPlace(lastSubmission.place || '');
+    }
+    setDMsg('');
+    setView('result');
+  }
+
   async function submitDate() {
     if (!dDate) { setDMsg('Bitte ein Datum auswählen.'); return; }
     try {
       await api('/api/submissions', { method: 'POST', body: { date: dDate, time: dTime, place: dPlace, answers: quizAnswers } });
       setDMsg('');
-      const sub = { name: currentUser, date: dDate, time: dTime, place: dPlace };
-      setLastSubmission(sub);
-      buildConfirmText(sub);
+      const me = await api('/api/auth/me');
+      if (me.submission) {
+        setLastSubmission(me.submission);
+        buildConfirmText(me.submission);
+      }
       setView('confirmed');
     } catch (e) {
       setDMsg(e.message);
@@ -246,6 +258,21 @@ export default function Page() {
     if (!confirm('Zugang für ' + name + ' wirklich entfernen?')) return;
     try {
       await api('/api/users/' + encodeURIComponent(name), { method: 'DELETE' });
+      await loadAdmin();
+    } catch {}
+  }
+
+  async function toggleConfirm(id, confirmed) {
+    try {
+      await api('/api/submissions/' + id, { method: 'PATCH', body: { confirmed } });
+      await loadAdmin();
+    } catch {}
+  }
+
+  async function deleteSubmission(id, name) {
+    if (!confirm('Termin von ' + name + ' wirklich löschen?')) return;
+    try {
+      await api('/api/submissions/' + id, { method: 'DELETE' });
       await loadAdmin();
     } catch {}
   }
@@ -354,10 +381,14 @@ export default function Page() {
         {view === 'confirmed' && (
           <div className="view">
             <div className="confirm-box">
-              <div className="big-emoji">🥂</div>
-              <h2 className="card-title">Termin steht!</h2>
+              <div className="big-emoji">{lastSubmission?.confirmed ? '🎉' : '🥂'}</div>
+              <h2 className="card-title">{lastSubmission?.confirmed ? 'Termin bestätigt!' : 'Termin eingereicht!'}</h2>
               <p className="card-lede">{confirmText}</p>
+              {!lastSubmission?.confirmed && (
+                <p className="pending-note">Wartet noch auf Bestätigung …</p>
+              )}
               <button className="btn secondary" onClick={downloadIcs}>In Kalender speichern (.ics)</button>
+              <button className="btn ghost" onClick={editSubmission}>Termin ändern</button>
               <button className="btn ghost" onClick={logout}>Abmelden</button>
             </div>
           </div>
@@ -402,14 +433,35 @@ export default function Page() {
             <div className="admin-section">
               <h3>Eingereichte Dates</h3>
               {submissions.length === 0 && <div className="empty-hint">Noch keine Dates eingetragen.</div>}
-              {submissions.map((s, i) => {
+              {submissions.map((s) => {
                 const niceDate = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(s.date + 'T00:00:00'));
                 return (
-                  <div className="sub-row" key={i}>
-                    <div>
-                      <div className="who">{s.name}</div>
-                      <div className="pw">{niceDate}{s.time ? ', ' + s.time + ' Uhr' : ''}{s.place ? ' · ' + s.place : ''}</div>
+                  <div className="sub-item" key={s.id}>
+                    <div className="sub-row">
+                      <div>
+                        <div className="who">
+                          {s.name}
+                          {s.confirmed && <span className="badge-confirmed">✓ bestätigt</span>}
+                        </div>
+                        <div className="pw">{niceDate}{s.time ? ', ' + s.time + ' Uhr' : ''}{s.place ? ' · ' + s.place : ''}</div>
+                      </div>
+                      <div className="sub-actions">
+                        <button className="btn small secondary" onClick={() => toggleConfirm(s.id, !s.confirmed)}>
+                          {s.confirmed ? 'Aufheben' : 'Bestätigen'}
+                        </button>
+                        <button className="del-btn" onClick={() => deleteSubmission(s.id, s.name)}>✕</button>
+                      </div>
                     </div>
+                    {s.answers?.length > 0 && (
+                      <details className="answers-detail">
+                        <summary>Antworten anzeigen</summary>
+                        <ul>
+                          {s.answers.map((ans, i) => (
+                            <li key={i}><strong>{QUESTIONS[i]?.q ?? ('Frage ' + (i + 1))}:</strong> {ans}</li>
+                          ))}
+                        </ul>
+                      </details>
+                    )}
                   </div>
                 );
               })}

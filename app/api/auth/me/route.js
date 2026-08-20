@@ -11,7 +11,7 @@ export async function GET(request) {
   if (session.role === 'guest') {
     const row = db.prepare('SELECT * FROM submissions WHERE user_name = ? COLLATE NOCASE ORDER BY id DESC LIMIT 1').get(session.name);
     const submission = row
-      ? { name: row.user_name, date: row.date, time: row.time, place: row.place, answers: JSON.parse(row.answers || '[]') }
+      ? { id: row.id, name: row.user_name, date: row.date, time: row.time, place: row.place, confirmed: !!row.confirmed, answers: JSON.parse(row.answers || '[]') }
       : null;
     return NextResponse.json({ session, submission });
   }
