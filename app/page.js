@@ -304,9 +304,9 @@ export default function Page() {
   return (
     <div className="stage">
       <div className="hero">
-        <p className="eyebrow">— exklusives Vorstellungsgespräch —</p>
-        <h1>Herzklopf-Casting</h1>
-        <p className="sub">Nur geladene Gäste. Bestehe den Flirt-Test und sicher dir ein echtes Date.</p>
+        <p className="eyebrow">— exklusives Bewerbungsgespräch —</p>
+        <h1>Unterwürfigkeits-Casting</h1>
+        <p className="sub">Nur geladene Gäste. Bestehe den Flirt-Test und sicher dir ein heißes Date.</p>
       </div>
 
       {(view === 'quiz' || view === 'result') && (
@@ -341,7 +341,7 @@ export default function Page() {
 
             {loginTab === 'guest' && (
               <div>
-                <h2 className="card-title">Zutritt nur mit Einladung</h2>
+                <h2 className="card-title">Zutritt nur mit Einladung und für heiße Mädchen</h2>
                 <p className="card-lede">Name und Passwort bitte — du weißt schon, wovon ich rede.</p>
                 <label>Name</label>
                 <input type="text" value={gName} onChange={e => setGName(e.target.value)} placeholder="Dein Name" />
@@ -514,7 +514,7 @@ export default function Page() {
         )}
       </div>
 
-      <footer className="tiny">Vorhang, Bühne, Herzklopfen — nur für dich gemacht.</footer>
+      <footer className="tiny">Prickeln, Feuchtes Höschen, Herzklopfen — nur für dich gemacht mein süßer kleiner Zwerg.</footer>
     </div>
   );
 }
