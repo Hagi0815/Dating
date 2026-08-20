@@ -22,8 +22,13 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Unbekannter Name oder falsches Passwort.' }, { status: 401 });
   }
 
+  const row = db.prepare('SELECT * FROM submissions WHERE user_name = ? COLLATE NOCASE ORDER BY id DESC LIMIT 1').get(user.name);
+  const submission = row
+    ? { id: row.id, name: row.user_name, date: row.date, time: row.time, place: row.place, confirmed: !!row.confirmed, answers: JSON.parse(row.answers || '[]') }
+    : null;
+
   const token = signToken({ name: user.name, role: 'guest' });
-  const res = NextResponse.json({ ok: true, name: user.name });
+  const res = NextResponse.json({ ok: true, name: user.name, submission });
   res.cookies.set('session', token, SESSION_COOKIE_OPTIONS);
   return res;
 }

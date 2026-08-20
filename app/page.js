@@ -136,12 +136,18 @@ export default function Page() {
       setGMsg('');
       setCurrentUser(res.name);
       setGName(''); setGPass('');
-      setQuizIndex(0);
-      setQuizAnswers([]);
-      setReaction('');
-      setShowCustomInput(false);
-      setCustomAnswer('');
-      setView('quiz');
+      if (res.submission) {
+        setLastSubmission(res.submission);
+        buildConfirmText(res.submission);
+        setView('confirmed');
+      } else {
+        setQuizIndex(0);
+        setQuizAnswers([]);
+        setReaction('');
+        setShowCustomInput(false);
+        setCustomAnswer('');
+        setView('quiz');
+      }
     } catch (e) {
       setGMsg(e.message);
     }
