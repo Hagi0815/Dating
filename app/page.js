@@ -67,6 +67,8 @@ export default function Page() {
   const [quizIndex, setQuizIndex] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState([]);
   const [reaction, setReaction] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customAnswer, setCustomAnswer] = useState('');
 
   const [dDate, setDDate] = useState('');
   const [dTime, setDTime] = useState('');
@@ -81,6 +83,7 @@ export default function Page() {
   const [nuName, setNuName] = useState('');
   const [nuPass, setNuPass] = useState('');
   const [nuMsg, setNuMsg] = useState({ text: '', ok: false });
+  const [adminActionMsg, setAdminActionMsg] = useState('');
 
   useEffect(() => { init(); }, []);
 
@@ -136,6 +139,8 @@ export default function Page() {
       setQuizIndex(0);
       setQuizAnswers([]);
       setReaction('');
+      setShowCustomInput(false);
+      setCustomAnswer('');
       setView('quiz');
     } catch (e) {
       setGMsg(e.message);
@@ -169,6 +174,8 @@ export default function Page() {
     setTimeout(() => {
       setQuizIndex(nextIndex);
       setReaction('');
+      setShowCustomInput(false);
+      setCustomAnswer('');
       if (nextIndex >= QUESTIONS.length) {
         const today = new Date().toISOString().split('T')[0];
         setDDate(prev => prev || '');
@@ -258,23 +265,32 @@ export default function Page() {
     if (!confirm('Zugang für ' + name + ' wirklich entfernen?')) return;
     try {
       await api('/api/users/' + encodeURIComponent(name), { method: 'DELETE' });
+      setAdminActionMsg('');
       await loadAdmin();
-    } catch {}
+    } catch (e) {
+      setAdminActionMsg(e.message);
+    }
   }
 
   async function toggleConfirm(id, confirmed) {
     try {
       await api('/api/submissions/' + id, { method: 'PATCH', body: { confirmed } });
+      setAdminActionMsg('');
       await loadAdmin();
-    } catch {}
+    } catch (e) {
+      setAdminActionMsg(e.message);
+    }
   }
 
   async function deleteSubmission(id, name) {
     if (!confirm('Termin von ' + name + ' wirklich löschen?')) return;
     try {
       await api('/api/submissions/' + id, { method: 'DELETE' });
+      setAdminActionMsg('');
       await loadAdmin();
-    } catch {}
+    } catch (e) {
+      setAdminActionMsg(e.message);
+    }
   }
 
   const today = new Date().toISOString().split('T')[0];
@@ -354,7 +370,28 @@ export default function Page() {
               {QUESTIONS[quizIndex].a.map((ans, i) => (
                 <button key={i} className="answer-btn" onClick={() => pickAnswer(ans)}>{ans}</button>
               ))}
+              {!showCustomInput && (
+                <button className="answer-btn custom-toggle" onClick={() => setShowCustomInput(true)}>
+                  ✍️ Eigene Antwort
+                </button>
+              )}
             </div>
+            {showCustomInput && (
+              <div className="custom-answer">
+                <input
+                  type="text"
+                  value={customAnswer}
+                  onChange={e => setCustomAnswer(e.target.value)}
+                  placeholder="Deine eigene Antwort …"
+                  maxLength={140}
+                  autoFocus
+                  onKeyDown={e => { if (e.key === 'Enter' && customAnswer.trim()) pickAnswer(customAnswer.trim()); }}
+                />
+                <button disabled={!customAnswer.trim()} onClick={() => customAnswer.trim() && pickAnswer(customAnswer.trim())}>
+                  Abschicken
+                </button>
+              </div>
+            )}
             <p className="reaction">{reaction}</p>
           </div>
         )}
@@ -401,6 +438,7 @@ export default function Page() {
               <button className="logout-link" onClick={logout}>abmelden</button>
             </div>
             <p className="card-lede">Hinweis: Das ist ein einfacher Namens-/Passwortschutz für den privaten Spaß — kein Hochsicherheitstrakt. Keine echten Zugangsdaten von woanders wiederverwenden.</p>
+            {adminActionMsg && <div className="msg error">{adminActionMsg}</div>}
 
             <div className="admin-section">
               <h3>Neuen Gast einladen</h3>

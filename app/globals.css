@@ -261,6 +261,35 @@ input:focus{ border-color:var(--rose); }
   transition:all .15s ease;
 }
 .answer-btn:hover{ border-color:var(--rose); background:#fff3f6; }
+.answer-btn.custom-toggle{
+  border-style:dashed;
+  text-align:center;
+  color:var(--rose-deep);
+  font-weight:600;
+  background:transparent;
+}
+.custom-answer{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+.custom-answer input[type="text"]{
+  flex:1;
+  margin:0;
+}
+.custom-answer button{
+  width:auto;
+  margin-top:0;
+  padding:0 16px;
+  border-radius:10px;
+  border:none;
+  background:var(--rose);
+  color:#fff8fb;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+.custom-answer button:disabled{ opacity:.5; cursor:not-allowed; }
 .reaction{
   margin-top:16px;
   font-family:'Fraunces',serif;
