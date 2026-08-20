@@ -342,7 +342,7 @@ export default function Page() {
             {loginTab === 'guest' && (
               <div>
                 <h2 className="card-title">Zutritt nur mit Einladung und für heiße Mädchen</h2>
-                <p className="card-lede">Name und Passwort bitte — du weißt schon, wovon ich rede. Lust.... und der hat einen...</p>
+                <p className="card-lede">Name und Passwort bitte — du weißt schon, wovon ich rede. Lust.... und der hat einen prallen... (alles zusammen und klein geschrieben, muss ja passen ;-))</p>
                 <label>Name</label>
                 <input type="text" value={gName} onChange={e => setGName(e.target.value)} placeholder="Dein Name" />
                 <label>Passwort</label>
